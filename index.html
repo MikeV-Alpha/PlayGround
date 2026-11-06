@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="theme-color" content="#07100e" />
+  <title>AC-130: Night Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"}}</script>
+</head>
+<body>
+  <main id="game-shell">
+    <canvas id="view"></canvas>
+    <div class="scanlines"></div><div class="vignette"></div><div class="noise"></div>
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">◈</div><div><b>AC–130U</b><span>GUNSHIP · NIGHT OPS</span></div></div>
+      <div class="mission-head"><span class="live-dot"></span><span id="mission-state">MISSION ACTIVE</span><i> / </i><span>OPERATION DUST DEVIL</span></div>
+      <div class="top-right"><span class="signal">▂ ▅ ▇ <small>LINK</small></span><span id="clock">02:14:08Z</span><button class="icon-btn" id="sound-toggle" aria-label="Toggle sound">♫</button></div>
+    </header>
+    <section class="hud">
+      <div class="mission-card panel"><div class="eyebrow"><span class="accent">01</span> TASKING</div><div class="mission-title">PROTECT THE CONVOY</div><div class="mission-copy" id="mission-copy">Hostile units are moving to intercept. Keep the route clear until the convoy reaches the extraction point.</div><div class="progress-line"><div id="convoy-progress"></div></div><div class="progress-meta"><span>CONVOY ROUTE</span><b id="route-label">0%</b></div></div>
+      <div class="target-card panel"><div class="eyebrow">SECTOR <span class="accent">ECHO–7</span><span class="target-label" id="target-state">SCANNING</span></div><div class="target-name" id="target-name">NO HOSTILE LOCK</div><div class="target-meta"><span>RANGE <b id="target-range">—</b></span><span>TYPE <b id="target-type">—</b></span></div></div>
+      <div class="compass panel"><div class="compass-label">AIRCRAFT ORBIT</div><div class="compass-ring"><span>N</span><span>E</span><span>S</span><span>W</span><div class="compass-plane">⌁</div></div><div class="orbit-readout">ALT <b>7,200 FT</b><i>·</i> SPD <b>184 KTS</b></div></div>
+      <div class="friendly-panel panel"><div class="eyebrow"><span class="ally-dot"></span> FRIENDLY ELEMENTS</div><div class="friendly-row"><span>ALPHA 1</span><div class="health-track"><i id="ally1-health"></i></div><b id="ally1-status">100%</b></div><div class="friendly-row"><span>ALPHA 2</span><div class="health-track"><i id="ally2-health"></i></div><b id="ally2-status">100%</b></div><div class="friendly-row"><span>ALPHA 3</span><div class="health-track"><i id="ally3-health"></i></div><b id="ally3-status">100%</b></div><div class="friendly-note">◆ ALLIES MARKED IN GREEN</div></div>
+      <div class="left-bottom"><div class="coords panel"><span>GRID</span><b id="grid-ref">37T CQ 418 762</b><i>THERMAL IMAGING ACTIVE</i></div><div class="radio panel"><div class="radio-icon">◖</div><div><span>RADIO · OVERLORD</span><b id="radio-line">“Gunship, convoy is moving. Stand by for contact.”</b></div><button id="radio-next" aria-label="Next radio message">↻</button></div></div>
+      <div class="right-bottom panel zoom-box"><div class="eyebrow">OPTICAL ZOOM</div><div class="zoom-value"><b id="zoom-readout">2.0</b><span>×</span></div><div class="zoom-meter"><i id="zoom-level" style="width:20%"></i></div><div class="zoom-buttons"><button id="zoom-out">−</button><button id="zoom-in">+</button></div></div>
+      <div class="crosshair"><div class="cross-top"></div><div class="cross-left"></div><div class="cross-center"><i></i></div><div class="cross-right"></div><div class="cross-bottom"></div><span class="range-tag" id="cross-range">— M</span></div>
+      <div class="bottom-hud"><div class="thermal-switch"><span>THERMAL</span><button id="thermal-toggle">WHITE HOT <b>⌄</b></button></div><div class="weapon-deck"><div class="weapon-select"><button class="weapon" data-weapon="0"><span class="weapon-key">1</span><span class="weapon-cal">25</span><span class="weapon-title">GATLING</span><i class="weapon-ready"></i></button><button class="weapon" data-weapon="1"><span class="weapon-key">2</span><span class="weapon-cal">40</span><span class="weapon-title">BOFORS</span><i class="weapon-ready"></i></button><button class="weapon active" data-weapon="2"><span class="weapon-key">3</span><span class="weapon-cal">105</span><span class="weapon-title">HOWITZER</span><i class="weapon-ready"></i></button></div><div class="weapon-details"><div class="weapon-info"><div><span class="eyebrow">SELECTED WEAPON</span><b id="weapon-label">M102 · 105 MM</b></div><span class="ammo-label">AMMO <b id="ammo-count">24</b></span></div><div class="reload-track"><i id="reload-fill"></i><span id="reload-label">READY TO FIRE</span></div></div></div><div class="objective-count"><span>HOSTILES</span><b id="hostile-count">04</b><i>REMAINING</i></div><div class="menu-actions"><button id="pause-button">Ⅱ</button><button id="restart-button">↻</button></div></div>
+    </section>
+    <div class="mobile-hint" id="mobile-hint">DRAG TO AIM <span>·</span> HOLD FIRE TO ENGAGE</div>
+    <button class="fire-button" id="fire-button"><span class="fire-icon">✣</span><b>FIRE</b><small>PRESS / HOLD</small></button>
+    <div class="toast" id="toast"></div>
+    <div class="modal" id="start-modal"><div class="modal-card start-card"><div class="kicker"><span class="live-dot"></span> 16TH SPECIAL OPERATIONS WING <span>·</span> CLASSIFIED</div><div class="title-line"><span class="title-emblem">◈</span><div><h1>AC–130<span>:</span><br>NIGHT OPERATIONS</h1><p>THE NIGHT IS YOURS TO COMMAND.</p></div></div><div class="start-rule"></div><div class="briefing"><div><span>MISSION 01</span><b>DUST DEVIL</b></div><p>Enemy armor is closing on a friendly convoy crossing the Arid Basin. Orbit the kill zone, identify hostiles through thermal optics, and keep the convoy moving.</p></div><div class="briefing-grid"><div><span>AREA OF OPERATIONS</span><b>ARID BASIN · GRID ECHO–7</b></div><div><span>FRIENDLY CALLSIGN</span><b>ALPHA CONVOY · 3 VEHICLES</b></div><div><span>WEAPONS AUTHORIZED</span><b>25 MM / 40 MM / 105 MM</b></div><div><span>RULES OF ENGAGEMENT</span><b>PID REQUIRED · AVOID FRIENDLIES</b></div></div><button id="start-button" class="primary-button">BEGIN MISSION <span>→</span></button><div class="controls-note"><span>⌖</span> DRAG / WASD TO AIM <i>·</i> 1–3 SELECT WEAPON <i>·</i> SPACE TO FIRE <i>·</i> SCROLL TO ZOOM</div></div></div>
+    <div class="modal hidden" id="result-modal"><div class="modal-card result-card"><div class="kicker" id="result-kicker">MISSION DEBRIEF</div><div class="result-icon" id="result-icon">✓</div><h2 id="result-title">MISSION COMPLETE</h2><p id="result-copy">The convoy has reached the extraction point.</p><div class="score-grid"><div><span>HOSTILES NEUTRALIZED</span><b id="score-kills">0</b></div><div><span>FRIENDLY LOSSES</span><b id="score-losses">0</b></div><div><span>MISSION TIME</span><b id="score-time">00:00</b></div></div><button id="result-restart" class="primary-button">FLY AGAIN <span>↻</span></button></div></div>
+    <div class="modal hidden" id="pause-modal"><div class="modal-card pause-card"><div class="kicker">SYSTEM PAUSED</div><h2>HOLD POSITION</h2><p>Mission simulation suspended.</p><button id="resume-button" class="primary-button">RESUME MISSION <span>→</span></button></div></div>
+  </main>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
